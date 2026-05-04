@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulation App Pro</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f0f0f,#1a1a1a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
+
+.container {
+  width: 330px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0,255,150,0.2);
+}
+
+.code-boxes {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.code-boxes input {
+  width: 26px;
+  height: 38px;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 8px;
+  border: none;
+  background: #222;
+  color: white;
+}
+
+.green {
+  background: #00ff88 !important;
+  color: black !important;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: linear-gradient(90deg,#00ff88,#00ccff);
+  color: black;
+  opacity: 0.5;
+}
+
+button.active {
+  opacity: 1;
+}
+
+.hidden { display: none; }
+
+.loader {
+  width: 45px;
+  height: 45px;
+  border: 5px solid #222;
+  border-top: 5px solid #00ff88;
+  border-radius: 50%;
+  margin: 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+input#username {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.user-check {
+  color: #00ff88;
+  display: none;
+  margin-bottom: 10px;
+}
+
+/* ✔️ Animation */
+.checkmark {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 10px;
+}
+
+.checkmark-circle {
+  stroke: #00ff88;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: drawCircle 0.6s ease forwards;
+}
+
+.checkmark-check {
+  stroke: #00ff88;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: drawCheck 0.4s 0.6s ease forwards;
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="step1">
+  <h2>🔐 إدخال الكود</h2>
+  <div class="code-boxes" id="boxes"></div>
+  <button id="btn" onclick="submitCode()">تحقق</button>
+</div>
+
+<div class="container hidden" id="loading">
+  <div class="loader"></div>
+  <p>جارٍ التحقق...</p>
+</div>
+
+<div class="container hidden" id="step2">
+  <h2>👤 تأكيد Username</h2>
+  <input id="username" placeholder="Username">
+  <div class="user-check" id="checkUser">✔️ تم التحقق</div>
+  <button onclick="confirmUser()">تأكيد</button>
+</div>
+
+<div class="container hidden" id="done">
+  
+  <svg class="checkmark" viewBox="0 0 52 52">
+    <circle class="checkmark-circle" cx="26" cy="26" r="25"/>
+    <path class="checkmark-check" fill="none" d="M14 27l7 7 16-16"/>
+  </svg>
+
+  <h3>تم بنجاح</h3>
+  <p>سيتم الاستلام خلال ساعتين</p>
+</div>
+
+<script>
+let boxes = document.getElementById("boxes");
+let btn = document.getElementById("btn");
+
+// 10 خانات (لصق فقط)
+for (let i = 0; i < 10; i++) {
+  let input = document.createElement("input");
+  input.maxLength = 1;
+
+  input.addEventListener("keydown", (e) => {
+    e.preventDefault();
+  });
+
+  boxes.appendChild(input);
+}
+
+// لصق الكود
+boxes.addEventListener("paste", (e) => {
+  e.preventDefault();
+  let paste = e.clipboardData.getData("text").trim();
+  let inputs = boxes.querySelectorAll("input");
+
+  for (let i = 0; i < inputs.length; i++) {
+    inputs[i].value = paste[i] || "";
+  }
+
+  checkComplete();
+});
+
+function checkComplete() {
+  let inputs = boxes.querySelectorAll("input");
+  let full = true;
+
+  inputs.forEach(inp => {
+    if (!inp.value) full = false;
+  });
+
+  if (full) {
+    inputs.forEach(inp => inp.classList.add("green"));
+    btn.classList.add("active");
+  }
+}
+
+function submitCode() {
+  if (!btn.classList.contains("active")) return;
+
+  document.getElementById("step1").classList.add("hidden");
+  document.getElementById("loading").classList.remove("hidden");
+
+  setTimeout(() => {
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
+  }, 2000);
+}
+
+document.getElementById("username").addEventListener("input", function(){
+  if(this.value.length > 2){
+    document.getElementById("checkUser").style.display = "block";
+  } else {
+    document.getElementById("checkUser").style.display = "none";
+  }
+});
+
+function confirmUser(){
+  let user = document.getElementById("username").value;
+  if(!user) return alert("اكتب Username");
+
+  document.getElementById("step2").classList.add("hidden");
+  document.getElementById("done").classList.remove("hidden");
+
+  setTimeout(resetApp, 5000);
+}
+
+// 🔥 إعادة ضبط كاملة بدل reload
+function resetApp() {
+  document.getElementById("done").classList.add("hidden");
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("step2").classList.add("hidden");
+
+  document.getElementById("step1").classList.remove("hidden");
+
+  // مسح الكود
+  let inputs = document.querySelectorAll("#boxes input");
+  inputs.forEach(inp => {
+    inp.value = "";
+    inp.classList.remove("green");
+  });
+
+  // إعادة الزر
+  btn.classList.remove("active");
+
+  // مسح اليوزر
+  document.getElementById("username").value = "";
+  document.getElementById("checkUser").style.display = "none";
+}
+</script>
+
+</body>
+</html>

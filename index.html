@@ -1,221 +1,121 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids TV Admin</title>
+<title>تأكيد</title>
 
 <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Tahoma, Arial;
+}
+
 body{
-margin:0;
-background:#111;
-font-family:Tahoma;
-padding:20px;
-color:white;
+    background:#f3f3f3;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
 }
 
-.box{
-max-width:500px;
-margin:auto;
-background:#1c1c1c;
-padding:20px;
-border-radius:25px;
-box-shadow:0 0 20px #000;
+/* شاشة التحميل */
+.loading-box{
+    text-align:center;
 }
 
-h1{
-text-align:center;
-margin-bottom:20px;
-color:#00ff99;
+.loader{
+    width:65px;
+    height:65px;
+    border:7px solid #e5e5e5;
+    border-top:7px solid #244a9b;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
 }
 
-input{
-width:100%;
-padding:15px;
-margin-top:12px;
-border:none;
-border-radius:12px;
-background:#2b2b2b;
-color:white;
-font-size:16px;
-box-sizing:border-box;
-outline:none;
+@keyframes spin{
+    100%{
+        transform:rotate(360deg);
+    }
 }
 
-button{
-width:100%;
-padding:15px;
-margin-top:15px;
-border:none;
-border-radius:12px;
-font-size:18px;
-font-weight:bold;
-cursor:pointer;
-transition:0.3s;
+.loading-text{
+    margin-top:18px;
+    font-size:28px;
+    color:#222;
 }
 
-.play{
-background:green;
-color:white;
+/* شاشة النجاح */
+.success-box{
+    display:none;
+    text-align:center;
 }
 
-.stop{
-background:red;
-color:white;
+.check{
+    width:95px;
+    height:95px;
+    background:#34c759;
+    border-radius:50%;
+    margin:auto;
+    position:relative;
+    animation:pop .4s ease;
 }
 
-img{
-width:120px;
-height:120px;
-border-radius:20px;
-object-fit:cover;
-display:block;
-margin:auto;
-margin-top:20px;
-background:white;
+.check::after{
+    content:'✔';
+    color:white;
+    font-size:55px;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
 }
 
-.toast{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-padding:15px 25px;
-border-radius:15px;
-font-size:18px;
-display:none;
-z-index:999;
-color:white;
+@keyframes pop{
+    0%{
+        transform:scale(0);
+    }
+    100%{
+        transform:scale(1);
+    }
 }
 
-.online{
-margin-top:20px;
-background:#242424;
-padding:15px;
-border-radius:15px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
+.success-text{
+    margin-top:15px;
+    font-size:26px;
+    color:#34c759;
+    font-weight:500;
 }
+
 </style>
 </head>
+
 <body>
 
-<div class="box">
-
-<h1>🎬 لوحة الأدمن</h1>
-
-<input type="text" id="name" placeholder="اسم الكرتون">
-
-<input type="text" id="video" placeholder="رابط الفيديو https">
-
-<input type="file" id="logoFile" accept="image/*">
-
-<img id="preview" hidden>
-
-<button class="play" onclick="startLive()">تشغيل</button>
-
-<button class="stop" onclick="stopLive()">إيقاف</button>
-
-<div class="online">
-👀 المشاهدين الآن:
-<span id="views">0</span>
+<!-- التحميل -->
+<div class="loading-box" id="loading">
+    <div class="loader"></div>
+    <div class="loading-text">الرجاء الانتظار..</div>
 </div>
 
+<!-- النجاح -->
+<div class="success-box" id="success">
+    <div class="check"></div>
+    <div class="success-text">تم التأكيد بنجاح</div>
 </div>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
 
-const firebaseConfig = {
-apiKey: "AIzaSyAUc2cH9gVE7RECiW19XQXjNZQxVH96sFE",
-authDomain: "zezo-59a8d.firebaseapp.com",
-databaseURL: "https://zezo-59a8d-default-rtdb.firebaseio.com",
-projectId: "zezo-59a8d",
-storageBucket: "zezo-59a8d.appspot.com",
-messagingSenderId: "49183098248",
-appId: "1:49183098248:web:37e3fb16744042a1bb263d"
-};
+setTimeout(() => {
 
-firebase.initializeApp(firebaseConfig);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("success").style.display = "block";
 
-const db = firebase.database();
-
-let logoBase64 = "";
-
-document.getElementById("logoFile").addEventListener("change", function(e){
-
-const file = e.target.files[0];
-
-const reader = new FileReader();
-
-reader.onload = function(){
-
-logoBase64 = reader.result;
-
-document.getElementById("preview").src = logoBase64;
-
-document.getElementById("preview").hidden = false;
-
-};
-
-reader.readAsDataURL(file);
-
-});
-
-function showToast(msg,color){
-
-const t = document.getElementById("toast");
-
-t.innerText = msg;
-
-t.style.background = color;
-
-t.style.display = "block";
-
-setTimeout(()=>{
-t.style.display = "none";
-},2500);
-
-}
-
-function startLive(){
-
-db.ref("kids-tv").set({
-
-status:true,
-
-name:document.getElementById("name").value,
-
-video:document.getElementById("video").value,
-
-logo:logoBase64
-
-});
-
-showToast("✅ تم تشغيل البث","green");
-
-}
-
-function stopLive(){
-
-db.ref("kids-tv").set({
-status:false
-});
-
-showToast("📺 تم إيقاف القناة","red");
-
-}
-
-db.ref("watching").on("value",(snap)=>{
-
-document.getElementById("views").innerText = snap.numChildren();
-
-});
+}, 3000);
 
 </script>
 

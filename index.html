@@ -3,38 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تأكيد</title>
+<title>خدمات تيك توك</title>
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Tahoma, Arial;
+    font-family:Tahoma, Arial, sans-serif;
 }
 
 body{
-    background:#f3f3f3;
-    height:100vh;
+    background:#f3f4f6;
     display:flex;
     justify-content:center;
     align-items:center;
-    overflow:hidden;
+    min-height:100vh;
 }
 
-/* شاشة التحميل */
-.loading-box{
+.box{
+    width:350px;
+    background:#fff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
     text-align:center;
 }
 
+h2{
+    margin-bottom:15px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#ff0050;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+#formPage,
+#loadingPage,
+#successPage{
+    display:none;
+}
+
 .loader{
-    width:65px;
-    height:65px;
-    border:7px solid #e5e5e5;
-    border-top:7px solid #244a9b;
+    width:60px;
+    height:60px;
+    border:6px solid #ddd;
+    border-top:6px solid #ff0050;
     border-radius:50%;
+    margin:20px auto;
     animation:spin 1s linear infinite;
-    margin:auto;
 }
 
 @keyframes spin{
@@ -43,79 +80,151 @@ body{
     }
 }
 
-.loading-text{
-    margin-top:18px;
-    font-size:28px;
-    color:#222;
-}
-
-/* شاشة النجاح */
-.success-box{
-    display:none;
-    text-align:center;
-}
-
 .check{
-    width:95px;
-    height:95px;
-    background:#34c759;
-    border-radius:50%;
-    margin:auto;
-    position:relative;
-    animation:pop .4s ease;
+    font-size:70px;
+    color:green;
+    margin-bottom:10px;
 }
 
-.check::after{
-    content:'✔';
-    color:white;
-    font-size:55px;
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
+.countdown{
+    margin-top:10px;
+    font-size:18px;
+    font-weight:bold;
 }
-
-@keyframes pop{
-    0%{
-        transform:scale(0);
-    }
-    100%{
-        transform:scale(1);
-    }
-}
-
-.success-text{
-    margin-top:15px;
-    font-size:26px;
-    color:#34c759;
-    font-weight:500;
-}
-
 </style>
 </head>
-
 <body>
 
-<!-- التحميل -->
-<div class="loading-box" id="loading">
-    <div class="loader"></div>
-    <div class="loading-text">الرجاء الانتظار..</div>
-</div>
+<div class="box">
 
-<!-- النجاح -->
-<div class="success-box" id="success">
-    <div class="check"></div>
-    <div class="success-text">تم التأكيد بنجاح</div>
+    <!-- الصفحة الرئيسية -->
+    <div id="menuPage">
+        <h2>اختر الخدمة</h2>
+
+        <button onclick="openForm('مشاهدات')">
+            👀 مشاهدات
+        </button>
+
+        <button onclick="openForm('لايكات')">
+            ❤️ لايكات
+        </button>
+    </div>
+
+    <!-- صفحة الطلب -->
+    <div id="formPage">
+        <h2 id="serviceTitle"></h2>
+
+        <input
+            type="text"
+            id="link"
+            placeholder="ضع رابط فيديو تيك توك"
+        >
+
+        <input
+            type="number"
+            id="amount"
+            placeholder="اكتب العدد المطلوب"
+        >
+
+        <button onclick="submitOrder()">
+            تأكيد
+        </button>
+    </div>
+
+    <!-- التحميل -->
+    <div id="loadingPage">
+        <h2>جاري معالجة الطلب...</h2>
+
+        <div class="loader"></div>
+
+        <div class="countdown">
+            الرجاء الانتظار...
+        </div>
+    </div>
+
+    <!-- النجاح -->
+    <div id="successPage">
+        <div class="check">✔</div>
+
+        <h2>تم إرسال الطلب بنجاح</h2>
+
+        <div class="countdown" id="timer">
+            سيتم الرجوع خلال 5 ثوانٍ
+        </div>
+    </div>
+
 </div>
 
 <script>
 
-setTimeout(() => {
+let currentService = "";
 
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("success").style.display = "block";
+function openForm(service){
 
-}, 3000);
+    currentService = service;
+
+    document.getElementById("menuPage").style.display = "none";
+    document.getElementById("formPage").style.display = "block";
+
+    document.getElementById("serviceTitle").innerText =
+        "طلب " + service;
+}
+
+function submitOrder(){
+
+    let link = document.getElementById("link").value.trim();
+    let amount = document.getElementById("amount").value.trim();
+
+    if(link === ""){
+        alert("ضع رابط تيك توك");
+        return;
+    }
+
+    if(!link.includes("tiktok")){
+        alert("يرجى إدخال رابط تيك توك صحيح");
+        return;
+    }
+
+    if(amount === ""){
+        alert("اكتب العدد المطلوب");
+        return;
+    }
+
+    document.getElementById("formPage").style.display = "none";
+    document.getElementById("loadingPage").style.display = "block";
+
+    setTimeout(function(){
+
+        document.getElementById("loadingPage").style.display = "none";
+        document.getElementById("successPage").style.display = "block";
+
+        let seconds = 5;
+
+        document.getElementById("timer").innerText =
+            "سيتم الرجوع خلال " + seconds + " ثوانٍ";
+
+        let countdown = setInterval(function(){
+
+            seconds--;
+
+            document.getElementById("timer").innerText =
+                "سيتم الرجوع خلال " + seconds + " ثوانٍ";
+
+            if(seconds <= 0){
+
+                clearInterval(countdown);
+
+                document.getElementById("successPage").style.display = "none";
+                document.getElementById("menuPage").style.display = "block";
+
+                document.getElementById("link").value = "";
+                document.getElementById("amount").value = "";
+            }
+
+        },1000);
+
+    },3000);
+}
 
 </script>
 
